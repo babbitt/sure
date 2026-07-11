@@ -91,10 +91,27 @@
     <% end %>
 
     <div data-oidc-field class="<%= "hidden" unless sso_provider.strategy == "openid_connect" %>">
+      <% current_base_url = request.base_url %>
+      <% needs_update = sso_provider.callback_url_needs_update?(current_base_url) %>
+      
+      <% if needs_update %>
+        <div class="bg-warning/10 border border-warning rounded-lg p-3 mb-3">
+          <div class="flex gap-2">
+            <%= icon "alert-triangle", class: "w-5 h-5 text-warning shrink-0" %>
+            <div class="flex-1">
+              <p class="text-sm font-medium text-warning"><%= t("admin.sso_providers.form.callback_url_warning_title") %></p>
+              <p class="text-xs text-warning mt-1"><%= t("admin.sso_providers.form.callback_url_warning_description") %></p>
+              <p class="text-xs text-warning mt-1"><strong><%= t("admin.sso_providers.form.old_base_url") %>:</strong> <%= sso_provider.base_url_from_redirect_uri %></p>
+              <p class="text-xs text-warning mt-1"><strong><%= t("admin.sso_providers.form.new_base_url") %>:</strong> <%= current_base_url %></p>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
       <label class="block text-sm font-medium text-primary mb-1"><%= t("admin.sso_providers.form.redirect_uri_label") %></label>
       <div class="flex items-center gap-2">
         <code class="flex-1 bg-surface px-3 py-2 rounded text-sm text-secondary overflow-x-auto"
-              data-admin-sso-form-target="callbackUrl"><%= "#{request.base_url}/auth/#{sso_provider.name.presence || 'PROVIDER_NAME'}/callback" %></code>
+              data-admin-sso-form-target="callbackUrl"><%= "#{current_base_url}/auth/#{sso_provider.name.presence || 'PROVIDER_NAME'}/callback" %></code>
         <button type="button"
                 data-action="click->admin-sso-form#copyCallback"
                 class="p-2 text-secondary hover:text-primary shrink-0"
@@ -103,6 +120,18 @@
         </button>
       </div>
       <p class="text-xs text-secondary mt-1"><%= t("admin.sso_providers.form.redirect_uri_help") %></p>
+      
+      <% if needs_update && sso_provider.persisted? %>
+        <div class="mt-3">
+          <%= link_to update_callback_url_admin_sso_provider_path(sso_provider), 
+                      method: :patch,
+                      class: "inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-secondary hover:text-primary border border-secondary rounded-lg",
+                      title: t("admin.sso_providers.form.update_callback_url_button") do %>
+            <%= icon "refresh-cw", class: "w-4 h-4" %>
+            <%= t("admin.sso_providers.form.update_callback_url_button") %>
+          <% end %>
+        </div>
+      <% end %>
     </div>
   </div>
 
@@ -164,10 +193,10 @@
           <label class="block text-sm font-medium text-primary mb-1"><%= t("admin.sso_providers.form.name_id_format") %></label>
           <select name="sso_provider[settings][name_id_format]"
                   class="w-full px-3 py-2 border border-primary rounded-lg text-sm">
-            <option value="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress" <%= "selected" if sso_provider.settings&.dig("name_id_format").blank? || sso_provider.settings&.dig("name_id_format") == "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress" %>><%= t("admin.sso_providers.form.name_id_email") %></option>
-            <option value="urn:oasis:names:tc:SAML:2.0:nameid-format:persistent" <%= "selected" if sso_provider.settings&.dig("name_id_format") == "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent" %>><%= t("admin.sso_providers.form.name_id_persistent") %></option>
-            <option value="urn:oasis:names:tc:SAML:2.0:nameid-format:transient" <%= "selected" if sso_provider.settings&.dig("name_id_format") == "urn:oasis:names:tc:SAML:2.0:nameid-format:transient" %>><%= t("admin.sso_providers.form.name_id_transient") %></option>
-            <option value="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified" <%= "selected" if sso_provider.settings&.dig("name_id_format") == "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified" %>><%= t("admin.sso_providers.form.name_id_unspecified") %></option>
+            <option value="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress" <%= "selected" if sso_provider.settings&.dig("name_id_format").blank? || sso_provider.settings&.dig("name_id_for[...]
+            <option value="urn:oasis:names:tc:SAML:2.0:nameid-format:persistent" <%= "selected" if sso_provider.settings&.dig("name_id_format") == "urn:oasis:names:tc:SAML:2.0:nameid-format:persi[...]
+            <option value="urn:oasis:names:tc:SAML:2.0:nameid-format:transient" <%= "selected" if sso_provider.settings&.dig("name_id_format") == "urn:oasis:names:tc:SAML:2.0:nameid-format:transi[...]
+            <option value="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified" <%= "selected" if sso_provider.settings&.dig("name_id_format") == "urn:oasis:names:tc:SAML:1.1:nameid-format:unsp[...]
           </select>
         </div>
       </div>
