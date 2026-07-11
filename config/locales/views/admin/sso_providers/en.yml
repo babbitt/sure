@@ -22,7 +22,7 @@ en:
         configuration_mode: "Configuration Mode"
         db_backed_providers: "Database-backed providers"
         db_backed_providers_description: "Load providers from database instead of YAML config"
-        db_backed_providers_help_html: "Set <code class=\"bg-surface px-1 py-0.5 rounded text-xs\">AUTH_PROVIDERS_SOURCE=db</code> to enable database-backed providers. This allows changes without server restarts."
+        db_backed_providers_help_html: "Set <code class=\"bg-surface px-1 py-0.5 rounded text-xs\">AUTH_PROVIDERS_SOURCE=db</code> to enable database-backed providers. This allows changes without server restart."
         table:
           name: "Name"
           strategy: "Strategy"
@@ -44,6 +44,7 @@ en:
         success: "SSO provider was successfully created."
       update:
         success: "SSO provider was successfully updated."
+        callback_url_updated: "Callback URL was successfully updated to the current base URL."
       destroy:
         success: "SSO provider was successfully deleted."
         confirm: "Are you sure you want to delete this provider? This action cannot be undone."
@@ -86,6 +87,11 @@ en:
         redirect_uri_label: "Callback URL"
         redirect_uri_placeholder: "https://yourdomain.com/auth/openid_connect/callback"
         redirect_uri_help: "Configure this URL in your identity provider"
+        callback_url_warning_title: "⚠️ Base URL Changed"
+        callback_url_warning_description: "The base URL in your callback URL doesn't match the current application base URL. This may cause authentication to fail. Click the update button below to fix this."
+        old_base_url: "Stored base URL"
+        new_base_url: "Current base URL"
+        update_callback_url_button: "Update Callback URL"
         saml_sp_callback_url_label: "SP Callback URL (ACS URL)"
         saml_sp_callback_url_help: "Configure this URL as the Assertion Consumer Service URL in your IdP"
         copy_button: "Copy"

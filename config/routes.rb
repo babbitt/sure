@@ -746,6 +746,7 @@ Rails.application.routes.draw do
       member do
         patch :toggle
         post :test_connection
+        patch :update_callback_url
       end
     end
     resources :users, only: [ :index, :update ]
