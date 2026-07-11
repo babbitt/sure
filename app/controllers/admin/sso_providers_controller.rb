@@ -2,7 +2,7 @@
 
 module Admin
   class SsoProvidersController < Admin::BaseController
-    before_action :set_sso_provider, only: %i[show edit update destroy toggle test_connection]
+    before_action :set_sso_provider, only: %i[show edit update destroy toggle test_connection update_callback_url]
 
     def index
       authorize SsoProvider
@@ -97,6 +97,29 @@ module Admin
         message: result.message,
         details: result.details
       }
+    end
+
+    def update_callback_url
+      authorize @sso_provider
+
+      # Update redirect_uri with current base URL while preserving the callback path
+      if @sso_provider.redirect_uri.present?
+        callback_path = @sso_provider.callback_path_from_redirect_uri
+        @sso_provider.redirect_uri = "#{request.base_url}#{callback_path}"
+
+        if @sso_provider.save
+          log_provider_change(:update_callback_url, @sso_provider)
+          clear_provider_cache
+          redirect_to edit_admin_sso_provider_path(@sso_provider), 
+                      notice: t(".callback_url_updated")
+        else
+          redirect_to edit_admin_sso_provider_path(@sso_provider),
+                      alert: t(".callback_url_update_failed")
+        end
+      else
+        redirect_to edit_admin_sso_provider_path(@sso_provider),
+                    alert: t(".no_callback_url_to_update")
+      end
     end
 
     private
