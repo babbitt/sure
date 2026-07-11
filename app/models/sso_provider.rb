@@ -59,6 +59,40 @@ class SsoProvider < ApplicationRecord
     }.compact
   end
 
+  # Extract the callback path from the stored redirect_uri
+  # E.g., "https://old-domain.com/auth/keycloak/callback" -> "/auth/keycloak/callback"
+  def callback_path_from_redirect_uri
+    return nil if redirect_uri.blank?
+    
+    begin
+      uri = URI.parse(redirect_uri)
+      uri.path
+    rescue URI::InvalidURIError
+      nil
+    end
+  end
+
+  # Extract the base URL from the stored redirect_uri
+  # E.g., "https://old-domain.com/auth/keycloak/callback" -> "https://old-domain.com"
+  def base_url_from_redirect_uri
+    return nil if redirect_uri.blank?
+    
+    begin
+      uri = URI.parse(redirect_uri)
+      "#{uri.scheme}://#{uri.host}#{":#{uri.port}" if uri.port && ((uri.scheme == "http" && uri.port != 80) || (uri.scheme == "https" && uri.port != 443))}"
+    rescue URI::InvalidURIError
+      nil
+    end
+  end
+
+  # Check if the base URL in redirect_uri matches the provided base URL
+  def callback_url_needs_update?(current_base_url)
+    return false if redirect_uri.blank?
+    
+    stored_base_url = base_url_from_redirect_uri
+    stored_base_url.present? && stored_base_url != current_base_url
+  end
+
   private
     def normalize_icon
       self.icon = icon.to_s.strip.presence
